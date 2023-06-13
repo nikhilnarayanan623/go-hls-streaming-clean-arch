@@ -7,4 +7,5 @@ import (
 
 func SetupVideo(api *gin.RouterGroup, videoHandler interfaces.VideoHandler) {
 
+	api.POST("/", videoHandler.Upload)
 }
