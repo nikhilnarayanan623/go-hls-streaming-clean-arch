@@ -90,3 +90,23 @@ func (c *videoHandler) FindAll(ctx *gin.Context) {
 
 	response.SuccessResponse(ctx, http.StatusOK, "successfully found all videos", videos)
 }
+
+func (c *videoHandler) Stream(ctx *gin.Context) {
+
+	videoID := ctx.Param("video_id")
+	playlist := ctx.Param("playlist")
+
+	buffer, err := c.videoUseCase.Stream(ctx, videoID, playlist)
+	if err != nil {
+		response.ErrorResponse(ctx, http.StatusInternalServerError, "failed to get stream data", err, nil)
+		return
+	}
+
+	ctx.Header("Content-Type", "application/vnd.apple.mpegurl")
+	ctx.Header("Content-Disposition", "inline")
+
+	_, err = ctx.Writer.Write(buffer)
+	if err != nil {
+		response.ErrorResponse(ctx, http.StatusInternalServerError, "failed to write buffer", err, nil)
+	}
+}

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -94,6 +95,17 @@ func (c *videoUseCase) FindAll(ctx context.Context, pagination request.Paginatio
 	video, err := c.videoRepo.FindAll(ctx, pagination)
 
 	return video, err
+}
+
+func (c *videoUseCase) Stream(ctx context.Context, videoID, playlist string) ([]byte, error) {
+
+	filePath := playListDir + "/" + videoID + "/" + playlist
+
+	buffer, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file \nerror:%w", err)
+	}
+	return buffer, nil
 }
 
 // create new video file using video id
