@@ -49,24 +49,40 @@ func (c *videoUseCase) Save(ctx context.Context, req request.UploadVideo) (strin
 		return "", fmt.Errorf("failed copy file from request \nerror:%s", err)
 	}
 
+	errChan := make(chan error, 2)
+
 	// create playlist
-	outputDir := playListDir + "/" + videoID
-	playListPath, err := utils.CreatePlaylistUsingFfmpeg(outputDir, videoFullPath, segmentDuration)
-	if err != nil {
-		return "", fmt.Errorf("failed to create playlist \nerror:%w", err)
-	}
+	playListPath := playListDir + "/" + videoID
 
-	// save video details on database
-	err = c.videoRepo.Save(ctx, domain.Video{
-		ID:          videoID,
-		Name:        req.Name,
-		Description: req.Description,
-		VideoUrl:    videoFullPath,
-		PlaylistUrl: playListPath,
-	})
+	go func(errChan chan error) {
+		err = utils.CreatePlaylistUsingFfmpeg(playListPath, videoFullPath, segmentDuration)
+		if err != nil {
+			errChan <- fmt.Errorf("failed to create playlist \nerror:%w", err)
+		}
+		errChan <- nil
+	}(errChan)
 
-	if err != nil {
-		return "", fmt.Errorf("failed to save video details on database")
+	go func(errChan chan error) {
+		// save video details on database
+		err = c.videoRepo.Save(ctx, domain.Video{
+			ID:          videoID,
+			Name:        req.Name,
+			Description: req.Description,
+			VideoUrl:    videoFullPath,
+			PlaylistUrl: playListPath,
+		})
+
+		if err != nil {
+			errChan <- fmt.Errorf("failed to save video details on database")
+		}
+		errChan <- nil
+	}(errChan)
+
+	for i := 1; i <= 2; i++ {
+		err = <-errChan
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return videoID, nil

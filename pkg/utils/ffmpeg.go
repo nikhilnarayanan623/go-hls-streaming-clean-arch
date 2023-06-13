@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-// create new playlist for file using ffmpeg on given outputDir
-func CreatePlaylistUsingFfmpeg(outputDir, inputFilePath string, segmentDuration time.Duration) (playlistPath string, err error) {
+// create new playlist for file using ffmpeg on given playlistDir
+func CreatePlaylistUsingFfmpeg(playlistDir, inputFilePath string, segmentDuration time.Duration) (err error) {
 
-	if err := os.MkdirAll(outputDir, 0700); err != nil {
-		return "", fmt.Errorf("failed to create playlist directory \nerror:%w", err)
+	if err := os.MkdirAll(playlistDir, 0700); err != nil {
+		return fmt.Errorf("failed to create playlist directory \nerror:%w", err)
 	}
 
-	playlistPath = fmt.Sprintf("%s/playlist.m3u8", outputDir)
+	// playlistPath = fmt.Sprintf("%s/playlist.m3u8", outputDir)
 
 	exec := exec.Command("ffmpeg",
 		"-i", inputFilePath,
@@ -24,13 +24,13 @@ func CreatePlaylistUsingFfmpeg(outputDir, inputFilePath string, segmentDuration 
 		"-hls_time", segmentDuration.String(), // duration of the segment
 		"-hls_list_size", "0",
 		"-f", "hls",
-		playlistPath,
+		fmt.Sprintf("%s/playlist.m3u8", playlistDir),
 	)
 
 	_, err = exec.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("failed to run ffmpeg command for create playlist \nerror:%w", err)
+		return fmt.Errorf("failed to run ffmpeg command for create playlist \nerror:%w", err)
 	}
 
-	return playlistPath, nil
+	return nil
 }
