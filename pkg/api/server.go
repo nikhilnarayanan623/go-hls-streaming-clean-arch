@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	_ "github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/docs"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/api/handler/interfaces"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/api/routes"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/config"
