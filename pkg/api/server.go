@@ -5,8 +5,8 @@ import (
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/api/handler/interfaces"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/api/routes"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/config"
-	// swaggerfiles "github.com/swaggo/files"
-	// ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -14,11 +14,13 @@ type Server struct {
 	port   string
 }
 
-func NewServerHTTP(cfg config.Config, videoHandler interfaces.VideoHandler, audioHandler interfaces.AudioHandler) *Server {
+func NewServerHTTP(cfg config.Config,
+	videoHandler interfaces.VideoHandler, audioHandler interfaces.AudioHandler) *Server {
 
-	engine := gin.Default()
+	engine := gin.New()
+	engine.Use(gin.Logger())
 
-	// engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	routes.SetupVideo(engine.Group("/video"), videoHandler)
 	routes.SetupAudio(engine.Group("/audio"), audioHandler)
