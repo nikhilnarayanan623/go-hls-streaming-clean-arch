@@ -11,6 +11,7 @@ import (
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/usecase/interfaces"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/utils"
 	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/utils/request"
+	"github.com/nikhilnarayanan623/go-hls-streaming-clean-arch/pkg/utils/response"
 )
 
 type videoUseCase struct {
@@ -69,6 +70,14 @@ func (c *videoUseCase) Save(ctx context.Context, req request.UploadVideo) (strin
 	}
 
 	return videoID, nil
+}
+
+// Find all videos
+func (c *videoUseCase) FindAll(ctx context.Context, pagination request.Pagination) (videos []response.VideoDetails, err error) {
+
+	video, err := c.videoRepo.FindAll(ctx, pagination)
+
+	return video, err
 }
 
 // create new video file using video id
